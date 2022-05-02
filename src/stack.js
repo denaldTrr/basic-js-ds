@@ -16,9 +16,8 @@ class Stack {
   constructor() {
     this.stack = [];
   }
-
-  push(el) {
-    this.stack.push(el);
+  push(element) {
+    this.stack.push(element);
   }
 
   pop() {
