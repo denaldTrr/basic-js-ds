@@ -7,135 +7,156 @@ const { NotImplementedError } = require('../extensions/index.js');
 * using Node from extensions
 */
 class BinarySearchTree {
-  constructor() {
-    this._root = null;
+  constructor(data) {
+    this.tree = data ? {data, right: null, left: null} : null;
   }
 
   root() {
-    return this._root;
+    return this.tree;
   }
 
   add(data) {
-    function addWithin(node, data) {
-      if (!node) {
-        return new Node(data);
-      }
-
-      if (node.data === data) {
-        return node;
-      }
-
-      if (data < node.data) {
-        node.left = addWithin(node.left, data);
+    let newNode = {data, right: null, left: null, parent: null};
+    let current = this.tree;
+    
+    while(1) {
+      if (!current) {
+        this.tree = newNode;
+        return;
       } else {
-        node.right = addWithin(node.right, data);
+        if (data === current.data) return;
+        if (data > current.data) {
+          if (current.right) {
+            current = current.right;
+          } else {
+            current.right = newNode;
+            newNode.parent = current;
+            return;
+          }
+        }
+        if (data < current.data) {
+          if (current.left) {
+            current = current.left;
+          } else {
+            current.left = newNode;
+            newNode.parent = current;
+            return;
+          }
+        }
       }
-
-      return node;
     }
-
-    this._root  = addWithin(this._root , data);
   }
 
   has(data) {
-    function search(node, data) {
-      if (!node) {
-        return false;
-      }
-
-      if (node.data === data) {
-        return true;
-      }
-
-      return data < node.data ? search(node.left, data) : search(node.right, data);
-    }
-
-    return search(this._root , data);
+    return !!this.find(data);
   }
 
   find(data) {
-    function search(node, data) {
-      if (!node) {
-        return null;
-      }
-
-      if (node.data === data) {
-        return node;
-      }
-
-      return data < node.data ? search(node.left, data) : search(node.right, data);
-    }
-
-    return search(this._root , data);
-  }
-
-  remove(data) {
-    function removeNode(node, data) {
-      if (!node) {
-        return null;
-      }
-
-      if (data < node.data) {
-        node.left = removeNode(node.left, data);
-        return node;
-      } else if (data > node.data) {
-        node.right = removeNode(node.right, data);
-        return node;
-      } else {
-        if (!node.left && !node.right) {
+    let current = this.tree;
+    
+    while(1) {
+      if (data === current.data) return current;
+      if (data > current.data) {
+        if (current.right) {
+          current = current.right;
+        } else {
           return null;
         }
-
-        if (!node.left) {
-          node = node.right;
-          return node;
+      }
+      if (data < current.data) {
+        if (current.left) {
+          current = current.left;
+        } else {
+          return null;
         }
-
-        if (!node.right) {
-          node = node.left;
-          return node;
-        }
-
-        let maxFromLeft = node.left;
-
-        while (maxFromLeft.right) {
-          maxFromLeft = maxFromLeft.right;
-        }
-        node.data = maxFromLeft.data;
-
-        node.left = removeNode(node.left, maxFromLeft.data);
-
-        return node;
       }
     }
-
-    this._root  = removeNode(this._root , data);
   }
 
+  remove(data) { 
+    let current = this.find(data);
+
+    if (current) {
+      if (!current.left && !current.right) {
+        if (current.data > current.parent.data) {
+          current.parent.right = null;
+        } else {
+          current.parent.left = null;
+        }
+        return;
+      }
+
+      if (!current.left) {
+        if (current.data > current.parent.data) {
+          current.parent.right = current.right;
+          current.right.parent = current.parent;
+        } else {
+          current.parent.left = current.right;
+          current.right.parent = current.parent;
+        }
+        return;
+      }
+
+      if (!current.right) {
+        if (current.data > current.parent.data) {
+          current.parent.right = current.left;
+          current.left.parent = current.parent;
+        } else {
+          current.parent.left = current.left;
+          current.left.parent = current.parent;
+        }
+        return;
+      }
+
+      if (current.right && current.left) {
+        let max = current.left;
+        
+        while(1) {
+          if (max.right) {
+            max = max.right;
+          } else {
+            break;
+          }
+        }
+
+        current.data = max.data;
+    
+        if (max.data > max.parent.data) {
+          max.parent.right = null;
+        } else {
+          max.parent.left = null;
+        }
+
+      }    
+    } 
+}
+
   min() {
-    if (!this._root ) {
-      return null;
-    }
+    let current = this.tree;
 
-    let min = this._root ;
-    while (min.left) {
-      min = min.left;
+    if (!current) return null;
+    
+    while(1) {
+      if (current.left) {
+        current = current.left;
+      } else {
+        return current.data;
+      }
     }
-
-    return min.data;
   }
 
   max() {
-    if (!this._root ) {
-      return null;
-    }
+    let current = this.tree;
 
-    let max = this._root ;
-    while (max.right) {
-      max = max.right;
+    if (!current) return null;
+    
+    while(1) {
+      if (current.right) {
+        current = current.right;
+      } else {
+        return current.data;
+      }
     }
-
-    return max.data;
   }
 }
 
